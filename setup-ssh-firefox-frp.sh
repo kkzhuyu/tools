@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 定义颜色
+# 颜色定义
 RED="\033[31m"
 GREEN="\033[32m"
 YELLOW="\033[33m"
@@ -10,14 +10,32 @@ RESET="\033[0m"
 FRP_SERVER="103.47.225.97"
 FRP_PORT=5443
 FRP_TOKEN="dhNxouNMv7NHiXIc"
-REMOTE_PORT_SSH=6000
-REMOTE_PORT_FIREFOX=5800
 PASSWORD="lkjhgdsa1"
 
-# 检查 root 权限
+# 检查是否为 root
 [[ $EUID -ne 0 ]] && echo -e "${RED}请使用 root 权限运行${RESET}" && exit 1
 
 echo -e "${GREEN}===== 一键部署：SSH + Firefox + FRP 隧道 =====${RESET}"
+
+# 查找未被占用的端口
+find_free_port() {
+  local start_port=$1
+  for ((port=start_port; port<start_port+1000; port++)); do
+    if ! ss -tuln | grep -q ":$port\b"; then
+      echo $port
+      return
+    fi
+  done
+  echo ""
+}
+
+REMOTE_PORT_SSH=$(find_free_port 6000)
+REMOTE_PORT_FIREFOX=$(find_free_port 5800)
+
+if [[ -z "$REMOTE_PORT_SSH" || -z "$REMOTE_PORT_FIREFOX" ]]; then
+  echo -e "${RED}找不到可用的本地端口，请检查系统端口占用情况${RESET}"
+  exit 1
+fi
 
 # 配置 SSH
 echo -e "${YELLOW}[1/4] 配置 SSH 服务...${RESET}"
@@ -42,9 +60,9 @@ docker run -d \
   --restart unless-stopped \
   jlesage/firefox
 
-# 下载并配置 FRPC
+# 下载并配置 frpc
 echo -e "${YELLOW}[3/4] 安装并配置 frpc...${RESET}"
-FRP_URL=$(wget -qO- https://api.github.com/repos/fatedier/frp/releases/latest | grep 'browser_download_url.*linux_amd64' | cut -d '"' -f 4)
+FRP_URL=$(wget -qO- https://api.github.com/repos/fatedier/frp/releases/latest | grep 'browser_download_url.*linux_amd64.tar.gz' | cut -d '"' -f 4 | head -n 1)
 wget -qO- "$FRP_URL" | tar xz
 mv frp_*/frpc /usr/local/bin/
 rm -rf frp_*
@@ -73,7 +91,7 @@ localPort = 5800
 remotePort = ${REMOTE_PORT_FIREFOX}
 EOF
 
-# 启动 FRPC
+# 启动 frpc
 echo -e "${YELLOW}[4/4] 启动 frpc 客户端...${RESET}"
 pkill -f "frpc -c /etc/frp/frpc.toml" 2>/dev/null || true
 nohup /usr/local/bin/frpc -c /etc/frp/frpc.toml >/dev/null 2>&1 &
