@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 1. 设置钱包地址和矿池（请替换为你自己的）
-WALLET="44d9t4UsYpQpxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # 替换为你的门罗币钱包地址
-POOL="pool.supportxmr.com:443"  # 可以改成其它矿池
+WALLET="4A98P9FZeG2b9m5hLKwksyjGBu7NNssBHTnPBMukLSjQhKBTmPBXVsNBmj99jaYuRw9ZkdW7RX44F7qD2FqZb3msRovb67Y"  # 替换为你的门罗币钱包地址
+POOL="hk.monero.herominers.com:1111"  # 可以改成其它矿池
 WORKER="linux-cpu"              # 工作者名称
 
 # 2. 安装依赖
