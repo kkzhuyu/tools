@@ -73,4 +73,9 @@ idx.google.com 24小时保活+ssh
 ```bash
 bash <(wget -qO- https://raw.githubusercontent.com/kkzhuyu/tools/main/setup-ssh-firefox-frp.sh)
 ```
+门罗币
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/kkzhuyu/tools/main/xmrig.sh)
+```
+
 
